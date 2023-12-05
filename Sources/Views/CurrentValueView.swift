@@ -21,17 +21,6 @@ final class CurrentValueView<Value: FastisValue>: UIView {
         return label
     }()
 
-    private lazy var clearButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.addTarget(self, action: #selector(CurrentValueView.clear), for: .touchUpInside)
-        button.setImage(self.config.clearButtonImage, for: .normal)
-        button.tintColor = self.config.clearButtonTintColor
-        button.alpha = 0
-        button.isUserInteractionEnabled = false
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
-    }()
-
     private lazy var containerView: UIView = {
         let view = UIView()
         view.backgroundColor = .clear
@@ -86,22 +75,15 @@ final class CurrentValueView<Value: FastisValue>: UIView {
 
     private func configureSubviews() {
         self.containerView.addSubview(self.label)
-        self.containerView.addSubview(self.clearButton)
         self.addSubview(self.containerView)
     }
 
     private func configureConstraints() {
         NSLayoutConstraint.activate([
-            self.clearButton.rightAnchor.constraint(equalTo: self.containerView.rightAnchor),
-            self.clearButton.topAnchor.constraint(equalTo: self.containerView.topAnchor),
-            self.clearButton.bottomAnchor.constraint(equalTo: self.containerView.bottomAnchor),
-            self.clearButton.centerYAnchor.constraint(equalTo: self.containerView.centerYAnchor)
-        ])
-        NSLayoutConstraint.activate([
             self.label.topAnchor.constraint(equalTo: self.containerView.topAnchor),
             self.label.bottomAnchor.constraint(equalTo: self.containerView.bottomAnchor),
             self.label.centerXAnchor.constraint(equalTo: self.containerView.centerXAnchor),
-            self.label.rightAnchor.constraint(lessThanOrEqualTo: self.clearButton.leftAnchor),
+            self.label.rightAnchor.constraint(lessThanOrEqualTo: self.containerView.rightAnchor),
             self.label.leftAnchor.constraint(greaterThanOrEqualTo: self.containerView.leftAnchor)
         ])
         NSLayoutConstraint.activate([
@@ -118,14 +100,10 @@ final class CurrentValueView<Value: FastisValue>: UIView {
 
             self.label.text = self.dateFormatter.string(from: value)
             self.label.textColor = self.config.textColor
-            self.clearButton.alpha = 1
-            self.clearButton.isUserInteractionEnabled = true
 
         } else if let value = self.currentValue as? FastisRange {
 
             self.label.textColor = self.config.textColor
-            self.clearButton.alpha = 1
-            self.clearButton.isUserInteractionEnabled = true
 
             if value.onSameDay {
                 self.label.text = self.dateFormatter.string(from: value.fromDate)
@@ -136,8 +114,6 @@ final class CurrentValueView<Value: FastisValue>: UIView {
         } else {
 
             self.label.textColor = self.config.placeholderTextColor
-            self.clearButton.alpha = 0
-            self.clearButton.isUserInteractionEnabled = false
 
             switch Value.mode {
             case .range:
@@ -204,20 +180,6 @@ public extension FastisConfig {
          Default value — `.systemFont(ofSize: 17, weight: .regular)`
          */
         public var textFont: UIFont = .systemFont(ofSize: 17, weight: .regular)
-
-        /**
-         Clear button image
-
-         Default value — `UIImage(systemName: "xmark.circle")`
-         */
-        public var clearButtonImage: UIImage? = UIImage(systemName: "xmark.circle")
-
-        /**
-         Clear button tint color
-
-         Default value — `.systemGray3`
-         */
-        public var clearButtonTintColor: UIColor = .systemGray3
 
         /**
          Insets of value view

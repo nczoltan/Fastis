@@ -66,44 +66,8 @@ import UIKit
 open class FastisController<Value: FastisValue>: UIViewController, JTACMonthViewDelegate, JTACMonthViewDataSource {
 
     // MARK: - Outlets
-
-    private lazy var cancelBarButtonItem: UIBarButtonItem = {
-        if let customButton = self.appearance.customCancelButton {
-            customButton.target = self
-            customButton.action = #selector(self.cancel)
-            return customButton
-        }
-
-        let barButtonItem = UIBarButtonItem(
-            title: self.appearance.cancelButtonTitle,
-            style: .plain,
-            target: self,
-            action: #selector(self.cancel)
-        )
-        barButtonItem.tintColor = self.appearance.barButtonItemsColor
-        return barButtonItem
-    }()
-
-    private lazy var doneBarButtonItem: UIBarButtonItem = {
-        if let customButton = self.appearance.customDoneButton {
-            customButton.target = self
-            customButton.action = #selector(self.done)
-            return customButton
-        }
-
-        let barButtonItem = UIBarButtonItem(
-            title: self.appearance.doneButtonTitle,
-            style: .done,
-            target: self,
-            action: #selector(self.done)
-        )
-        barButtonItem.tintColor = self.appearance.barButtonItemsColor
-        barButtonItem.isEnabled = self.allowToChooseNilDate
-        return barButtonItem
-    }()
-
     private lazy var calendarView: JTACMonthView = {
-        let monthView = JTACMonthView()
+      let monthView = JTACMonthView()
         monthView.translatesAutoresizingMaskIntoConstraints = false
         monthView.backgroundColor = self.appearance.backgroundColor
         monthView.ibCalendarDelegate = self
@@ -172,11 +136,11 @@ open class FastisController<Value: FastisValue>: UIViewController, JTACMonthView
     private var privateMaximumDate: Date?
     private var privateSelectMonthOnHeaderTap = false
     private var dayFormatter = DateFormatter()
-    private var value: Value? {
+    private (set) public var value: Value? {
         didSet {
             self.updateSelectedShortcut()
             self.currentValueView.currentValue = self.value
-            self.doneBarButtonItem.isEnabled = self.allowToChooseNilDate || self.value != nil
+            self.valueDidChange?(value)
         }
     }
 
@@ -216,15 +180,7 @@ open class FastisController<Value: FastisValue>: UIViewController, JTACMonthView
      */
     public var dismissHandler: ((DismissAction) -> Void)?
 
-    /**
-     The block to execute after "Done" button will be tapped
-     */
-    @available(*, unavailable, message: "use dismissHandler: ((DismissAction) -> Void)?")
-    public var doneHandler: ((Value?) -> Void)? {
-        get { nil }
-        // swiftlint:disable:next unused_setter_value
-        set { }
-    }
+    public var valueDidChange: ((Value?) -> Void)?
 
     /**
      And initial value which will be selected by default
@@ -300,6 +256,16 @@ open class FastisController<Value: FastisValue>: UIViewController, JTACMonthView
 
     }
 
+    open override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+      super.viewWillTransition(to: size, with: coordinator)
+      coordinator.animate { [weak self] _ in
+        let monthDates = self?.calendarView.visibleDates().monthDates
+        let inDates = self?.calendarView.visibleDates().indates
+        let anchor = monthDates?.first?.date ?? inDates?.first?.date
+        self?.calendarView.reloadData(withAnchor: anchor)
+      }
+    }
+
     /**
      Present FastisController above current top view controller
 
@@ -325,8 +291,6 @@ open class FastisController<Value: FastisValue>: UIViewController, JTACMonthView
     private func configureUI() {
         self.view.backgroundColor = self.appearance.backgroundColor
         self.navigationItem.largeTitleDisplayMode = .never
-        self.navigationItem.leftBarButtonItem = self.cancelBarButtonItem
-        self.navigationItem.rightBarButtonItem = self.doneBarButtonItem
     }
 
     private func configureSubviews() {
@@ -409,6 +373,7 @@ open class FastisController<Value: FastisValue>: UIViewController, JTACMonthView
 
     private func configureCell(_ cell: JTACDayCell, forItemAt date: Date, cellState: CellState, indexPath: IndexPath) {
         guard let cell = cell as? DayCell else { return }
+        cell.applyConfig(self.config)
         if let cachedConfig = self.viewConfigs[indexPath] {
             cell.configure(for: cachedConfig)
         } else {
@@ -429,7 +394,6 @@ open class FastisController<Value: FastisValue>: UIViewController, JTACMonthView
             }
 
             self.viewConfigs[indexPath] = newConfig
-            cell.applyConfig(self.config)
             cell.configure(for: newConfig)
         }
     }

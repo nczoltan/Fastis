@@ -69,7 +69,7 @@ public struct FastisConfig {
     public var dayCell = FastisConfig.DayCell()
 
     /// Today cell (selection parameters, font, etc.)
-    public var todayCell: FastisConfig.TodayCell? = FastisConfig.TodayCell()
+    public var todayCell = FastisConfig.TodayCell()
 
     /// Top header view with week day names
     public var weekView = FastisConfig.WeekView()
