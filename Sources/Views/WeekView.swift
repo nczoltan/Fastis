@@ -12,6 +12,13 @@ final class WeekView: UIView {
 
     // MARK: - Outlets
 
+    private lazy var divider: UIView = {
+        let divider = UIView()
+        divider.translatesAutoresizingMaskIntoConstraints = false
+        divider.backgroundColor = self.config.textColor
+        return divider
+    }()
+
     public lazy var stackView: UIStackView = {
         let stackView = UIStackView()
         stackView.backgroundColor = .clear
@@ -61,6 +68,7 @@ final class WeekView: UIView {
             self.stackView.addArrangedSubview(self.makeWeekLabel(for: weekdaySymbol))
         }
         self.addSubview(self.stackView)
+        self.addSubview(self.divider)
     }
 
     func makeWeekLabel(for symbol: String) -> UILabel {
@@ -74,9 +82,13 @@ final class WeekView: UIView {
 
     private func configureConstraints() {
         NSLayoutConstraint.activate([
+            self.divider.heightAnchor.constraint(equalToConstant: 1),
+            self.divider.topAnchor.constraint(equalTo: self.topAnchor),
+            self.divider.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+            self.divider.trailingAnchor.constraint(equalTo: self.trailingAnchor),
             self.stackView.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 4),
             self.stackView.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -4),
-            self.stackView.topAnchor.constraint(equalTo: self.topAnchor),
+            self.stackView.topAnchor.constraint(equalTo: self.topAnchor, constant: 8),
             self.stackView.bottomAnchor.constraint(equalTo: self.bottomAnchor)
         ])
         NSLayoutConstraint.activate([
@@ -121,7 +133,7 @@ public extension FastisConfig {
 
          Default value — `28pt`
          */
-        public var height: CGFloat = 28
+        public var height: CGFloat = 34
 
         /**
          Corner radius of the view
