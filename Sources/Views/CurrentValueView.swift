@@ -39,7 +39,7 @@ final class CurrentValueView<Value: FastisValue>: UIView {
     private lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = self.calendar.locale
-        formatter.dateFormat = self.config.format
+        formatter.setLocalizedDateFormatFromTemplate(self.config.format)
         formatter.calendar = self.calendar
         return formatter
     }()
@@ -86,11 +86,16 @@ final class CurrentValueView<Value: FastisValue>: UIView {
             self.label.rightAnchor.constraint(lessThanOrEqualTo: self.containerView.rightAnchor),
             self.label.leftAnchor.constraint(greaterThanOrEqualTo: self.containerView.leftAnchor)
         ])
+        let height = containerView.heightAnchor.constraint(greaterThanOrEqualToConstant: 40)
+        height.priority = .defaultHigh
+        let bottom = containerView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -self.config.insets.bottom)
+        bottom.priority = .defaultHigh
         NSLayoutConstraint.activate([
             self.containerView.topAnchor.constraint(equalTo: self.topAnchor, constant: self.config.insets.top),
             self.containerView.leftAnchor.constraint(equalTo: self.leftAnchor, constant: self.config.insets.left),
             self.containerView.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -self.config.insets.right),
-            self.containerView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -self.config.insets.bottom)
+            bottom,
+            height
         ])
     }
 

@@ -53,6 +53,12 @@ public struct FastisRange: FastisValue, Hashable {
         self.fromDate.isInSameDay(date: self.toDate)
     }
 
+    public func areInSameMonth(in calendar: Calendar) -> Bool {
+        let components1 = calendar.dateComponents([.year, .month], from: fromDate)
+        let components2 = calendar.dateComponents([.year, .month], from: toDate)
+        return components1.year == components2.year && components1.month == components2.month
+    }
+
     public func outOfRange(minDate: Date?, maxDate: Date?) -> Bool {
         self.fromDate < minDate ?? self.fromDate || self.toDate > maxDate ?? self.toDate
     }
